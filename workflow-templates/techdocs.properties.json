@@ -1,0 +1,7 @@
+{
+    "name": "Updater Techdocs Publish Workflow",
+    "description": "Starter workflow to publish Techdocs to Updater's Backstage.",
+    "categories": [
+        "Markdown"
+    ]
+}
