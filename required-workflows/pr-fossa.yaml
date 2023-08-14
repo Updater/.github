@@ -1,7 +1,9 @@
 ---
 name: PR - Fossa
 
-on: workflow_dispatch
+on:
+  pull_request:
+  workflow_dispatch:
 
 env:
   FOSSA_TELEMETRY_SCOPE: off
