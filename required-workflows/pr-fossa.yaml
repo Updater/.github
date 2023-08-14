@@ -45,7 +45,7 @@ jobs:
 
           touch .fossa.yml
 
-          yq m -i .fossa.yml generated-fossa.yml
+          yq '. *= load("generated-fossa.yml")' .fossa.yml
 
           echo "### Updated `.fossa.yml`\n```yaml\n$(cat .fossa.yml)\n```" >> $GITHUB_STEP_SUMMARY
 
