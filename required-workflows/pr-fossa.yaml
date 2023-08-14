@@ -32,9 +32,7 @@ jobs:
             FOSSA_TEAM="Dolly"
           fi
 
-          touch .fossa.yml
-
-          yq m -i .fossa.yml <(cat << EOF
+          cat >> generated-fossa.yml <<EOF
           version: 3
 
           project:
@@ -43,9 +41,13 @@ jobs:
 
           telemetry:
             scope: off
-          EOF)
+          EOF
 
-          echo "### Generated `.fossa.yml`\n```yaml\n$(cat .fossa.yml)\n```" >> $GITHUB_STEP_SUMMARY
+          touch .fossa.yml
+
+          yq m -i .fossa.yml generated-fossa.yml
+
+          echo "### Updated `.fossa.yml`\n```yaml\n$(cat .fossa.yml)\n```" >> $GITHUB_STEP_SUMMARY
 
       - name: List targets
         continue-on-error: true
