@@ -52,7 +52,7 @@ jobs:
         run: |
           fossa list-targets
 
-          echo "### Targets\n$(fossa list targets)" >> $GITHUB_STEP_SUMMARY
+          echo "### Targets\n$(fossa list-targets)" >> $GITHUB_STEP_SUMMARY
 
       - name: Analyze
         continue-on-error: true
