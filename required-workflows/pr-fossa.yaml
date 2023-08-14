@@ -37,7 +37,6 @@ jobs:
           fi
 
           yq -i ".version |= 3" .fossa.yml
-          yq -i ".telemetry.scope |= \"off\"" .fossa.yml
           yq -i ".project.id |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
           yq -i ".project.url |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
 
