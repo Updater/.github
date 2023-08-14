@@ -32,9 +32,9 @@ jobs:
             FOSSA_TEAM="Dolly"
           fi
 
-          touch .fossa.yml
-
-          echo "___" >> .fossa.yml
+          if [[ ! -e .fossa.yml ]]; then
+            echo "{}" >> .fossa.yml
+          fi
 
           yq -i ".version |= 3" .fossa.yml
           yq -i ".telemetry.scope |= \"off\"" .fossa.yml
