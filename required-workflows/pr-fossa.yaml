@@ -1,0 +1,69 @@
+---
+name: PR - Fossa
+
+on: workflow_dispatch
+
+env:
+  FOSSA_TELEMETRY_SCOPE: off
+
+jobs:
+  fossa:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        continue-on-error: true
+
+      - name: Install fossa-cli
+        continue-on-error: true
+        run: |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+
+          echo "### Fossa CLI version\n$(fossa --version)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate .fossa.yml
+        continue-on-error: true
+        run: |
+          if [[ ${GITHUB_REPOSITORY_OWNER} == "Updater" ]]; then
+            FOSSA_TEAM="Home Platform"
+          elif [[ ${GITHUB_REPOSITORY_OWNER == "DollyInc" ]]; then
+            FOSSA_TEAM="Dolly"
+          fi
+
+          touch .fossa.yml
+
+          yq m -i .fossa.yml <(cat << EOF
+          version: 3
+
+          project:
+            id: github.com/${GITHUB_REPOSITORY}
+            url: github.com/${GITHUB_REPOSITORY}
+
+          telemetry:
+            scope: off
+          EOF)
+
+          echo "### Generated `.fossa.yml`\n```yaml\n$(cat .fossa.yml)\n```" >> $GITHUB_STEP_SUMMARY
+
+      - name: List targets
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: |
+          fossa list targets
+
+          echo "### Targets\n$(fossa list targets)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Analyze
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: |
+          fossa analyze
+
+      - name: Report
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: |
+          fossa report attribution --format markdown --timeout 60 >> $GITHUB_STEP_SUMMARY
