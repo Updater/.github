@@ -41,7 +41,10 @@ jobs:
           yq -i ".project.id |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
           yq -i ".project.url |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
 
-          echo "### Updated `.fossa.yml`\n```yaml\n$(cat .fossa.yml)\n```" >> $GITHUB_STEP_SUMMARY
+          echo '### Updated `.fossa.yml`' >> $GITHUB_STEP_SUMMARY
+          echo '```yaml' >> $GITHUB_STEP_SUMMARY
+          cat .fossa.yml >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: List targets
         continue-on-error: true
