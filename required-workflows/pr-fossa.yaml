@@ -21,7 +21,7 @@ jobs:
         run: |
           curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
 
-          echo "### Fossa CLI version" >> $GITHUB_STEP_SUMMARY
+          echo '### Fossa CLI version' >> $GITHUB_STEP_SUMMARY
           fossa --version >> $GITHUB_STEP_SUMMARY
 
       - name: Generate .fossa.yml
@@ -51,8 +51,8 @@ jobs:
         env:
           FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
         run: |
-          echo "### Targets" >> $GITHUB_STEP_SUMMARY
-          fossa list-targets | tee $GITHUB_STEP_SUMMARY
+          echo '### Targets' >> $GITHUB_STEP_SUMMARY
+          fossa list-targets >> $GITHUB_STEP_SUMMARY
 
       - name: Analyze
         continue-on-error: true
