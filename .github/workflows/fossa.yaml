@@ -43,7 +43,7 @@ jobs:
       - name: Generate .fossa.yml
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.token }}
+          GH_TOKEN: ${{ secrets.token }}
           REPO: ${{ inputs.repository }}
         run: |
           REPO_OWNER=$(echo "${REPO%/*}" | tr '[:upper:]' '[:lower:]')
