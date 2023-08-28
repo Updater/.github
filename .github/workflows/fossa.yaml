@@ -62,13 +62,12 @@ jobs:
 
           if [[ ! -e .fossa.yml ]]; then
             echo "{}" >> .fossa.yml
+            yq -i ".version |= 3" .fossa.yml
+            yq -i ".project.id |= \"github.com/${REPO}\"" .fossa.yml
+            yq -i ".project.name |= \"${REPO_NAME}\"" .fossa.yml
+            yq -i ".project.team |= \"${FOSSA_TEAM}\"" .fossa.yml
+            yq -i ".project.url |= \"https://github.com/${REPO}\"" .fossa.yml
           fi
-
-          yq -i ".version |= 3" .fossa.yml
-          yq -i ".project.id |= \"github.com/${REPO}\"" .fossa.yml
-          yq -i ".project.name |= \"${REPO_NAME}\"" .fossa.yml
-          yq -i ".project.team |= \"${FOSSA_TEAM}\"" .fossa.yml
-          yq -i ".project.url |= \"https://github.com/${REPO}\"" .fossa.yml
 
           echo '### Updated `.fossa.yml`' >> $GITHUB_STEP_SUMMARY
           echo '```yaml' >> $GITHUB_STEP_SUMMARY
@@ -81,7 +80,10 @@ jobs:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         run: |
           echo '### Targets' >> $GITHUB_STEP_SUMMARY
-          fossa list-targets >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```bash'
+          fossa list-targets 2>&1 | tee >(grep -v '\[ ' targets.txt >> $GITHUB_STEP_SUMMARY)
+          echo '```'
 
       - name: Analyze
         continue-on-error: true
@@ -96,4 +98,4 @@ jobs:
       #   env:
       #     FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
       #   run: |
-      #     fossa report attribution --format markdown --timeout 60 >> $GITHUB_STEP_SUMMARY
+      #     fossa report attribution --format markdown --timeout 60 2>&! | tee $GITHUB_STEP_SUMMARY
