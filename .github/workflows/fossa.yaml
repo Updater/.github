@@ -81,9 +81,9 @@ jobs:
         run: |
           echo '### Targets' >> $GITHUB_STEP_SUMMARY
           echo '' >> $GITHUB_STEP_SUMMARY
-          echo '```bash'
-          fossa list-targets 2>&1 | tee >(grep -v '\[ ' targets.txt >> $GITHUB_STEP_SUMMARY)
-          echo '```'
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          fossa list-targets 2>&1 | tee >(grep -v '\[ ' >> $GITHUB_STEP_SUMMARY)
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Analyze
         continue-on-error: true
