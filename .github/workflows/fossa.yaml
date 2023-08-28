@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Generate GitHub API token for reading
         id: generate_reader_token
-        if: ${{ secrets.token == '' }}
+        if: ${{ inputs.github-app-id != '' }}
         uses: Updater/action-github-app-authenticate@v2
         with:
           app-id: ${{ inputs.github-app-id }}
