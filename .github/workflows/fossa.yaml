@@ -4,6 +4,12 @@ name: Fossa
 on:
   workflow_call:
     inputs:
+      github-app-id:
+        required: false
+        type: string
+      org:
+        required: false
+        type: string
       ref:
         default: ''
         required: false
@@ -14,8 +20,11 @@ on:
     secrets:
       fossa-api-key:
         required: true
+      github-private-key:
+        required: false
       token:
-        required: true
+        required: false
+
 
 env:
   FOSSA_TELEMETRY_SCOPE: off
@@ -25,12 +34,21 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub API token for reading
+        id: generate_reader_token
+        if: !secrets.token
+        uses: Updater/action-github-app-authenticate@v2
+        with:
+          app-id: ${{ inputs.github-app-id }}
+          private-key: ${{ secrets.github-private-key }}
+          org: ${{ inputs.org }}
+
       - uses: actions/checkout@v3
         continue-on-error: true
         with:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.ref }}
-          token: ${{ secrets.token }}
+          token: ${{ secrets.token || steps.generate_reader_token.outputs.token }}
 
       - name: Install fossa-cli
         continue-on-error: true
@@ -43,7 +61,7 @@ jobs:
       - name: Generate .fossa.yml
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.token }}
+          GH_TOKEN: ${{ secrets.token || steps.generate_reader_token.outputs.token }}
           REPO: ${{ inputs.repository }}
         run: |
           REPO_OWNER=$(echo "${REPO%/*}" | tr '[:upper:]' '[:lower:]')
