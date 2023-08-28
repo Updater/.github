@@ -11,7 +11,7 @@ env:
 jobs:
   fossa:
     continue-on-error: true
-    uses: ./.github/workflows/fossa.yaml
+    uses: Updater/.github/.github/workflows/fossa.yaml@main
     secrets:
       fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
       token: ${{ github.token }}
