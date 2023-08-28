@@ -1,0 +1,99 @@
+---
+name: Fossa
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        default: ''
+        required: false
+        type: string
+      repository:
+        required: true
+        type: string
+    secrets:
+      fossa-api-key:
+        required: true
+      token:
+        required: true
+
+env:
+  FOSSA_TELEMETRY_SCOPE: off
+
+jobs:
+  fossa-analyze:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        continue-on-error: true
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.token }}
+
+      - name: Install fossa-cli
+        continue-on-error: true
+        run: |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+
+          echo '### Fossa CLI version' >> $GITHUB_STEP_SUMMARY
+          fossa --version >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate .fossa.yml
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.token }}
+          REPO: ${{ inputs.repository }}
+        run: |
+          REPO_OWNER=$(echo "${REPO%/*}" | tr '[:upper:]' '[:lower:]')
+          REPO_NAME=$(echo "${REPO#*/}" | tr '[:upper:]' '[:lower:]')
+          TOPICS=$(gh repo view --json repositoryTopics --jq '.repositoryTopics')
+
+          if [[ ${TOPICS} =~ "hsc" ]]; then
+            FOSSA_TEAM="HomeSafe Connect New"
+          elif [[ ${REPO_OWNER} == "dollyinc" ]]; then
+            FOSSA_TEAM="Dolly"
+          elif [[ ${REPO_OWNER} == "movehq" ]]; then
+            FOSSA_TEAM="MoveHQ New"
+          elif [[ ${REPO_OWNER} == "updater" ]]; then
+            FOSSA_TEAM="Home Platform
+          fi
+
+          if [[ ! -e .fossa.yml ]]; then
+            echo "{}" >> .fossa.yml
+          fi
+
+          yq -i ".version |= 3" .fossa.yml
+          yq -i ".project.id |= \"github.com/${REPO}\"" .fossa.yml
+          yq -i ".project.name |= \"${REPO_NAME}\"" .fossa.yml
+          yq -i ".project.team |= \"${FOSSA_TEAM}\"" .fossa.yml
+          yq -i ".project.url |= \"https://github.com/${REPO}\"" .fossa.yml
+
+          echo '### Updated `.fossa.yml`' >> $GITHUB_STEP_SUMMARY
+          echo '```yaml' >> $GITHUB_STEP_SUMMARY
+          cat .fossa.yml >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: List targets
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
+        run: |
+          echo '### Targets' >> $GITHUB_STEP_SUMMARY
+          fossa list-targets >> $GITHUB_STEP_SUMMARY
+
+      - name: Analyze
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
+        run: |
+          fossa analyze
+
+      # TODO enable after making API key push & pull if desired
+      # - name: Report
+      #   continue-on-error: true
+      #   env:
+      #     FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
+      #   run: |
+      #     fossa report attribution --format markdown --timeout 60 >> $GITHUB_STEP_SUMMARY

@@ -11,60 +11,10 @@ env:
 jobs:
   fossa:
     continue-on-error: true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        continue-on-error: true
-
-      - name: Install fossa-cli
-        continue-on-error: true
-        run: |
-          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
-
-          echo '### Fossa CLI version' >> $GITHUB_STEP_SUMMARY
-          fossa --version >> $GITHUB_STEP_SUMMARY
-
-      - name: Generate .fossa.yml
-        continue-on-error: true
-        run: |
-          if [[ ${GITHUB_REPOSITORY_OWNER} == "Updater" ]]; then
-            FOSSA_TEAM="Home Platform"
-          elif [[ ${GITHUB_REPOSITORY_OWNER} == "DollyInc" ]]; then
-            FOSSA_TEAM="Dolly"
-          fi
-
-          if [[ ! -e .fossa.yml ]]; then
-            echo "{}" >> .fossa.yml
-          fi
-
-          yq -i ".version |= 3" .fossa.yml
-          yq -i ".project.id |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
-          yq -i ".project.url |= \"github.com/${GITHUB_REPOSITORY}\"" .fossa.yml
-
-          echo '### Updated `.fossa.yml`' >> $GITHUB_STEP_SUMMARY
-          echo '```yaml' >> $GITHUB_STEP_SUMMARY
-          cat .fossa.yml >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: List targets
-        continue-on-error: true
-        env:
-          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-        run: |
-          echo '### Targets' >> $GITHUB_STEP_SUMMARY
-          fossa list-targets >> $GITHUB_STEP_SUMMARY
-
-      - name: Analyze
-        continue-on-error: true
-        env:
-          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-        run: |
-          fossa analyze
-
-      # TODO enable after making API key push & pull if desired
-      # - name: Report
-      #   continue-on-error: true
-      #   env:
-      #     FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-      #   run: |
-      #     fossa report attribution --format markdown --timeout 60 >> $GITHUB_STEP_SUMMARY
+    uses: ./.github/workflows/fossa.yaml
+    secrets:
+      fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
+      token: ${{ github.token }}
+    with:
+      repository: ${{ github.repository }}
+      ref: ${{ github.ref }}
