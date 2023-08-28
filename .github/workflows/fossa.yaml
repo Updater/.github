@@ -57,7 +57,7 @@ jobs:
           elif [[ ${REPO_OWNER} == "movehq" ]]; then
             FOSSA_TEAM="MoveHQ New"
           elif [[ ${REPO_OWNER} == "updater" ]]; then
-            FOSSA_TEAM="Home Platform
+            FOSSA_TEAM="Home Platform"
           fi
 
           if [[ ! -e .fossa.yml ]]; then
