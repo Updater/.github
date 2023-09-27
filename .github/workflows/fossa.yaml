@@ -25,7 +25,6 @@ on:
       token:
         required: false
 
-
 env:
   FOSSA_TELEMETRY_SCOPE: off
 
@@ -78,14 +77,25 @@ jobs:
             FOSSA_TEAM="Home Platform"
           fi
 
+          case ${REPO_NAME} in
+            "consumer-native-app" | "dollyandroid" | "dollyios" | "dollyios-cert-repo")
+              FOSSA_POLICY="96923"
+              ;;
+            *)
+              FOSSA_POLICY="72455"
+              ;;
+          esac
+
           if [[ ! -e .fossa.yml ]]; then
             echo "{}" >> .fossa.yml
-            yq -i ".version |= 3" .fossa.yml
-            yq -i ".project.id |= \"github.com/${REPO}\"" .fossa.yml
-            yq -i ".project.name |= \"${REPO_NAME}\"" .fossa.yml
-            yq -i ".project.team |= \"${FOSSA_TEAM}\"" .fossa.yml
-            yq -i ".project.url |= \"https://github.com/${REPO}\"" .fossa.yml
           fi
+
+          yq -i ".version |= 3" .fossa.yml
+          yq -i ".project.id |= \"github.com/${REPO}\"" .fossa.yml
+          yq -i ".project.name |= \"${REPO_NAME}\"" .fossa.yml
+          yq -i ".project.policyId |= ${FOSSA_POLICY}" .fossa.yml
+          yq -i ".project.team |= \"${FOSSA_TEAM}\"" .fossa.yml
+          yq -i ".project.url |= \"https://github.com/${REPO}\"" .fossa.yml
 
           echo '### Updated `.fossa.yml`' >> $GITHUB_STEP_SUMMARY
           echo '```yaml' >> $GITHUB_STEP_SUMMARY
