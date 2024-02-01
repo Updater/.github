@@ -30,7 +30,6 @@ env:
 
 jobs:
   fossa-analyze:
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Generate GitHub API token for reading
@@ -114,16 +113,15 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Analyze
-        continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         run: |
           fossa analyze
+          fossa test
 
-      # TODO enable after making API key push & pull if desired
-      # - name: Report
-      #   continue-on-error: true
-      #   env:
-      #     FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-      #   run: |
-      #     fossa report attribution --format markdown --timeout 60 2>&! | tee $GITHUB_STEP_SUMMARY
+      - name: Report
+        continue-on-error: true
+        env:
+          FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
+        run: |
+          fossa report attribution --format markdown --timeout 60 2>&! | tee $GITHUB_STEP_SUMMARY
