@@ -122,7 +122,6 @@ jobs:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
-          echo ${{ steps.list-targets.outputs.targets_count }}
           fossa analyze
           fossa test
 
@@ -132,6 +131,5 @@ jobs:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
-          echo ${{ steps.list-targets.outputs.targets_count }}
           GITHUB_STEP_SUMMARY=$(fossa report attribution --format markdown --timeout 60 2>&1)
           echo $GITHUB_STEP_SUMMARY
