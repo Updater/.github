@@ -114,7 +114,7 @@ jobs:
           echo $TARGETS | tee >(grep -v '\[ ' >> $GITHUB_STEP_SUMMARY)
           echo '```' >> $GITHUB_STEP_SUMMARY
           TARGETS_COUNT=$(echo $TARGETS | grep -v '\[ ' | wc -l)
-          echo "$TARGETS_COUNT" >> "$GITHUB_OUTPUT"
+          echo "targets_count=${TARGETS_COUNT}" >> "$GITHUB_OUTPUT"
           
       - name: Analyze
         env:
