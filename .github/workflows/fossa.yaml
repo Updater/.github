@@ -120,8 +120,9 @@ jobs:
       - name: Analyze
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
+#        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
         run: |
+          echo ${{ steps.list-targets.outputs.targets_count }}
           fossa analyze
           fossa test
 
@@ -129,7 +130,8 @@ jobs:
         continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
+#        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
         run: |
+          echo ${{ steps.list-targets.outputs.targets_count }}
           GITHUB_STEP_SUMMARY=$(fossa report attribution --format markdown --timeout 60 2>&1)
           echo $GITHUB_STEP_SUMMARY
