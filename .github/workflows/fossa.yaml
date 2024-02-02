@@ -112,7 +112,7 @@ jobs:
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           TARGETS=$(fossa list-targets 2>&1)
           echo $TARGETS | tee >(grep -v '\[ ' >> $GITHUB_STEP_SUMMARY)
-          TARGETS_COUNT=$(echo $TARGETS | grep -v '\[ ' | wc -l)
+          TARGETS_COUNT=$(echo $TARGETS | grep 'Found target' | wc -l)
           echo "targets_count=${TARGETS_COUNT}" >> "$GITHUB_OUTPUT"
           echo '```' >> $GITHUB_STEP_SUMMARY
 
@@ -120,7 +120,7 @@ jobs:
       - name: Analyze
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-#        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
           echo ${{ steps.list-targets.outputs.targets_count }}
           fossa analyze
@@ -130,7 +130,7 @@ jobs:
         continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-#        if: ${{ steps.list-targets.outputs.targets_count > 0 }}
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
           echo ${{ steps.list-targets.outputs.targets_count }}
           GITHUB_STEP_SUMMARY=$(fossa report attribution --format markdown --timeout 60 2>&1)
