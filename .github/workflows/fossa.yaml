@@ -124,4 +124,5 @@ jobs:
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         run: |
-          fossa report attribution --format markdown --timeout 60 2>&! | tee $GITHUB_STEP_SUMMARY
+          GITHUB_STEP_SUMMARY=$(fossa report attribution --format markdown --timeout 60 2>&!)
+          echo $GITHUB_STEP_SUMMARY
