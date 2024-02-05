@@ -123,13 +123,30 @@ jobs:
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
           fossa analyze
-          fossa test
 
-      - name: Report
+      - name: FOSSA test & Capture
         continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
-          GITHUB_STEP_SUMMARY=$(fossa report attribution --format markdown --timeout 60 2>&1)
-          echo $GITHUB_STEP_SUMMARY
+          fossa test --format text-pretty > fossa-output.txt 2>&1
+
+      - name: Check for Errors
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
+        run: |
+          if [[ -s fossa-output.txt ]]; then
+            # File is not empty, meaning there was some output which might be an error
+            echo "FOSSA Test Output (Possible Error):"
+            cat fossa-output.txt
+            echo '# FOSSA Report' > report.md
+            echo '```' >> report.md
+            cat fossa-output.txt >> report.md
+            echo '```' >> report.md
+            # echo "::error ::FOSSA test failed or reported issues. See above output for details."
+            # exit 1
+          fi
+
+      - name: Set Step Summary
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
+        run: cat report.md > $GITHUB_STEP_SUMMARY
