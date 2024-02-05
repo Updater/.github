@@ -130,7 +130,8 @@ jobs:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
-          fossa test --format text-pretty > fossa-output.txt 2>&1
+          fossa test --format text-pretty 2>&1
+#          fossa test --format text-pretty > fossa-output.txt 2>&1
 
       - name: Check for Errors
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
