@@ -125,7 +125,7 @@ jobs:
           fossa analyze
 
       - name: FOSSA test & Capture
-        continue-on-error: true
+        #continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
