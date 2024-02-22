@@ -125,29 +125,48 @@ jobs:
           fossa analyze
 
       - name: FOSSA test & Capture
-        #continue-on-error: true
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
         if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
-          fossa test --format text-pretty 2>&1
-#          fossa test --format text-pretty > fossa-output.txt 2>&1
+          fossa test --format text-pretty > fossa-output.txt 2>&1
 
-      # - name: Check for Errors
-      #   if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
-      #   run: |
-      #     if [[ -s fossa-output.txt ]]; then
-      #       # File is not empty, meaning there was some output which might be an error
-      #       echo "FOSSA Test Output (Possible Error):"
-      #       cat fossa-output.txt
-      #       echo '# FOSSA Report' > report.md
-      #       echo '```' >> report.md
-      #       cat fossa-output.txt >> report.md
-      #       echo '```' >> report.md
-      #       # echo "::error ::FOSSA test failed or reported issues. See above output for details."
-      #       # exit 1
-      #     fi
+      - name: Check for Errors
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 && !cancelled() && ( success() || failure() ) }}
+        run: |
+          if [[ -s fossa-output.txt ]]; then
+            # File is not empty, meaning there was some output which might be an error
+            echo "FOSSA Test Output (Possible Error):"
+            cat fossa-output.txt
+            echo '# FOSSA Report' >> report.md
+            echo '```' >> report.md
+            cat fossa-output.txt >> report.md
+            echo '```' >> report.md
+            echo "::error ::FOSSA test failed or reported issues. See job summary for details."
+          fi
 
-      # - name: Set Step Summary
-      #   if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
-      #   run: cat report.md > $GITHUB_STEP_SUMMARY
+      - name: Set Step Summary and Report
+        id: summary
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 && !cancelled() && ( success() || failure() ) }}
+        run: cat report.md > $GITHUB_STEP_SUMMARY
+
+      - name: Get Pull Request Number
+        id: pr
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 && !cancelled() && ( success() || failure() ) }}
+        run: |
+          PULL_REQUEST_NUMBER=$(gh pr view --json number -q .number || echo '')
+          echo "pull_request_number=${PULL_REQUEST_NUMBER}" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set Comment
+        uses: actions/github-script@v6
+        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 && !cancelled() && failure() && fromJSON(steps.pr.outputs.pull_request_number) != '' }}
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: '${{steps.pr.outputs.pull_request_number}}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "👋 Fossa Policy Error! See Fossa Job Summary for details"
+            })
