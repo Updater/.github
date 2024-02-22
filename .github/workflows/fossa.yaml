@@ -170,4 +170,3 @@ jobs:
               repo: context.repo.repo,
               body: "👋 Fossa Policy Error! See Fossa Job Summary for details"
             })
-
