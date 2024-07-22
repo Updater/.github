@@ -120,7 +120,7 @@ jobs:
       - name: Analyze
         env:
           FOSSA_API_KEY: ${{ secrets.fossa-api-key }}
-        if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
+        # if: ${{ fromJSON(steps.list-targets.outputs.targets_count) > 0 }}
         run: |
           fossa analyze
 
