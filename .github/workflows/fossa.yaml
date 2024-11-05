@@ -80,6 +80,9 @@ jobs:
             "consumer-native-app" | "dollyandroid" | "dollyios" | "dollyios-cert-repo")
               FOSSA_POLICY="96923"
               ;;
+            "innovation-mobile")
+              FOSSA_POLICY="102111"
+              ;;
             *)
               FOSSA_POLICY="72455"
               ;;
