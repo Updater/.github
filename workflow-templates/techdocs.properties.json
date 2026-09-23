@@ -1,7 +1,0 @@
-{
-    "name": "Publish Techdocs",
-    "description": "Starter workflow to publish Techdocs to Updater's Backstage.",
-    "categories": [
-        "Markdown"
-    ]
-}
